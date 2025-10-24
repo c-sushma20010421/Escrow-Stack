@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>EazyPayouts - Load Screen</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+    color: #333;
+    height: 100vh;
+    display: flex;
+  }
+  .sidebar {
+    background: #fff;
+    width: 220px;
+    box-shadow: 1px 0 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+  }
+  .sidebar-logo {
+    font-weight: bold;
+    font-size: 20px;
+    color: #f7941d;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .sidebar-menu {
+    list-style: none;
+  }
+  .sidebar-menu li {
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #555;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+  .sidebar-menu li.active {
+    color: white;
+    background-color: #0071d3;
+  }
+  
+  .sidebar-menu li:not(.active):hover {
+    background-color: #e0e7ff;
+  }
+
+  .main-content {
+    flex-grow: 1;
+    background: #fff;
+    margin: 20px;
+    border-radius: 10px;
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  .header-logo {
+    font-weight: bold;
+    font-size: 24px;
+    color: #f7941d;
+    flex-shrink: 0;
+  }
+  .header-balance {
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .available-balance {
+    color: #4caf50;
+    font-weight: 700;
+    font-size: 20px;
+    margin-left: 10px;
+  }
+
+  .selectors {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  select {
+    padding: 8px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    min-width: 180px;
+  }
+
+  .subheading {
+    margin-bottom: 15px;
+    color: #555;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead {
+    background-color: #f7f7f7;
+    color: #555;
+  }
+  th, td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e3e3e3;
+    text-align: left;
+    font-size: 14px;
+  }
+  th:nth-child(2), th:nth-child(3),
+  td:nth-child(2), td:nth-child(3) {
+    text-align: right;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    text-align: center;
+  }
+  .credit-green {
+    color: #4caf50;
+    font-weight: 600;
+  }
+  .no-transactions {
+    text-align: center;
+    padding: 40px 0;
+    color: #999;
+  }
+
+  footer {
+    margin-top: auto;
+    text-align: right;
+    padding-top: 25px;
+    color: #888;
+    user-select: none;
+  }
+
+  @media (max-width: 700px) {
+    body {
+      flex-direction: column;
+    }
+    .sidebar {
+      width: 100%;
+      flex-direction: row;
+      padding: 0;
+      box-shadow: none;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .sidebar-logo {
+      display: none;
+    }
+    .sidebar-menu {
+      display: flex;
+      gap: 10px;
+    }
+    .sidebar-menu li {
+      border-radius: 5px;
+      flex: 1;
+      justify-content: center;
+      padding: 10px;
+    }
+    .main-content {
+      margin: 0 15px 20px 15px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .selectors {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-logo">EazyPayouts</div>
+    <ul class="sidebar-menu">
+      <li class="active" id="menu-loads">Loads</li>
+      <li id="menu-transactions">Transactions</li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-logo">EazyPayouts</div>
+      <div class="header-balance">
+        Available Balance 
+        <span class="available-balance">₹888,88,88,888</span>
+      </div>
+    </header>
+
+    <div class="selectors">
+      <select id="company-select" aria-label="Select Company">
+        <option value="">Select Company</option>
+      </select>
+
+      <select id="account-select" aria-label="Select Account" disabled>
+        <option value="">Select Account</option>
+      </select>
+    </div>
+
+    <h3 class="subheading">Latest Loads are displayed here</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Credit</th>
+          <th>A/c Balance</th>
+          <th>UTR/RRN</th>
+          <th>A/c No / UPI</th>
+        </tr>
+      </thead>
+      <tbody id="transactions-body">
+        <tr>
+          <td colspan="5" class="no-transactions">No transactions to display.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer>Logout</footer>
+  </main>
+
+<script>
+  // data
+  const companies = [
+    { id: "c1", name: "Company 1" },
+    { id: "c2", name: "Company 2" }
+  ];
+
+  const accounts = {
+    c1: [
+      { id: "a1", name: "Account 1 - Comp 1" },
+      { id: "a2", name: "Account 2 - Comp 1" }
+    ],
+    c2: [
+      { id: "a3", name: "Account 1 - Comp 2" },
+      { id: "a4", name: "Account 2 - Comp 2" }
+    ]
+  };
+
+  const transactions = {
+    a1: [
+      { date: "07/05/2024 01:04 PM", credit: "₹21,337", balance: "₹21,337", utr: "1000000", accNo: "AC0CF2RRUY407QHU" },
+      { date: "04/05/2024 12:38 PM", credit: "₹21,337", balance: "₹21,337", utr: "CMS4136431811", accNo: "0104SLNEFTPL" }
+    ],
+    a2: [
+      { date: "28/03/2024 05:09 PM", credit: "₹1,237", balance: "₹21,337", utr: "CMS4019645011", accNo: "ACT861VM9RR6Z75C" }
+    ],
+    a3: [
+      { date: "28/03/2024 05:09 PM", credit: "₹5,015.69", balance: "₹5,015.69", utr: "CMS3956666735", accNo: "AC0CF2RRUY407QHU" }
+    ],
+    a4: [
+      { date: "19/03/2024 11:33 PM", credit: "₹16,000", balance: "₹16,000", utr: "CMS3938654916", accNo: "AC0CF2RRUY407QHU" }
+    ]
+  };
+
+  
+  const companySelect = document.getElementById('company-select');
+  const accountSelect = document.getElementById('account-select');
+  const transactionsBody = document.getElementById('transactions-body');
+
+
+  function loadCompanies() {
+    companies.forEach(company => {
+      const option = document.createElement('option');
+      option.value = company.id;
+      option.textContent = company.name;
+      companySelect.appendChild(option);
+    });
+  }
+
+
+  function loadAccounts(companyId) {
+    accountSelect.innerHTML = '<option value="">Select Account</option>';
+    if (companyId && accounts[companyId]) {
+      accounts[companyId].forEach(acc => {
+        const option = document.createElement('option');
+        option.value = acc.id;
+        option.textContent = acc.name;
+        accountSelect.appendChild(option);
+      });
+      accountSelect.disabled = false;
+    } else {
+      accountSelect.disabled = true;
+    }
+    clearTransactions();
+  }
+
+  
+  function loadTransactions(accountId) {
+    transactionsBody.innerHTML = '';
+    if (accountId && transactions[accountId]) {
+      transactions[accountId].forEach(tx => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${tx.date}</td>
+          <td class="credit-green">${tx.credit}</td>
+          <td>${tx.balance}</td>
+          <td style="text-align:center;">${tx.utr}</td>
+          <td>${tx.accNo}</td>
+        `;
+        transactionsBody.appendChild(row);
+      });
+    } else {
+      clearTransactions();
+    }
+  }
+
+  
+  function clearTransactions() {
+    transactionsBody.innerHTML = '<tr><td colspan="5" class="no-transactions">No transactions to display.</td></tr>';
+  }
+
+  // addevent listener
+  companySelect.addEventListener('change', e => {
+    loadAccounts(e.target.value);
+  });
+
+  accountSelect.addEventListener('change', e => {
+    loadTransactions(e.target.value);
+  });
+
+
+  loadCompanies();
+  clearTransactions();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Stock Broker Client Web Dashboard</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 640px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 36px 32px 24px 32px;
+      box-shadow: 0 4px 20px 2px #0001;
+    }
+    h1 {
+      text-align: center;
+      color: #4660af;
+      margin-bottom: 32px;
+    }
+    form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      justify-content: center;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+    }
+    button {
+      padding: 8px 20px;
+      font-size: 16px;
+      background: #2661bc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #3a79d3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 11px 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+    thead th {
+      background: #e3eafc;
+      font-weight: 600;
+      color: #2d3d78;
+    }
+    tbody tr:nth-child(odd) {
+      background: #fafbfe;
+    }
+    .remove-btn {
+      background: none;
+      color: #ba2424;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    @media (max-width: 700px) {
+      .container {
+        padding: 20px 6px;
+      }
+      th, td {
+        padding: 7px 2px;
+      }
+      form { flex-direction: column; gap: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stock Broker Client Dashboard</h1>
+    <form id="subscribeForm">
+      <input 
+        type="text" 
+        id="stockInput"
+        placeholder="Enter Stock Code (e.g., GOOGL, TSLA, AMZN, NFLX, META...)" 
+        autocomplete="off" 
+        required />
+      <button type="submit">Subscribe</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Stock Code</th>
+          <th>Current Price (₹)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="stocksBody">
+        
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    
+    let subscribedStocks = {};
+
+    const stocksBody = document.getElementById('stocksBody');
+    const form = document.getElementById('subscribeForm');
+    const input = document.getElementById('stockInput');
+
+    
+    function generateRandomPrice() {
+      return (Math.random() * 4000 + 1000).toFixed(2);
+    }
+
+    
+    function subscribeStock(code) {
+      code = code.trim().toUpperCase();
+      if (!code) return;
+      if (!subscribedStocks[code]) {
+        subscribedStocks[code] = parseFloat(generateRandomPrice());
+      }
+      renderTable();
+    }
+
+    
+    function unsubscribeStock(code) {
+      delete subscribedStocks[code];
+      renderTable();
+    }
+
+    
+    function renderTable() {
+      stocksBody.innerHTML = '';
+      Object.keys(subscribedStocks).forEach(code => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${code}</td>
+          <td id="price-${code}">${subscribedStocks[code]}</td>
+          <td><button class="remove-btn" onclick="unsubscribeStock('${code}')">Remove</button></td>
+        `;
+        stocksBody.appendChild(tr);
+      });
+      
+      if (Object.keys(subscribedStocks).length === 0) {
+        stocksBody.innerHTML = `<tr><td colspan="3" style="color:#888;text-align:center; padding: 16px;">No stocks subscribed. Enter a stock code to start tracking.</td></tr>`;
+      }
+    }
+
+    
+    function updatePrices() {
+      Object.keys(subscribedStocks).forEach(code => {
+        
+        let last = subscribedStocks[code];
+        let change = (Math.random() * 0.06 - 0.03) * last;
+        let newPrice = Math.max(1, last + change);
+        newPrice = newPrice.toFixed(2);
+        subscribedStocks[code] = parseFloat(newPrice);
+        const priceCell = document.getElementById('price-' + code);
+        if (priceCell) priceCell.textContent = newPrice;
+      });
+    }
+    setInterval(updatePrices, 1000);
+
+    
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      subscribeStock(input.value);
+      input.value = '';
+    };
+
+    
+    window.unsubscribeStock = unsubscribeStock;
+
+    renderTable();
+  </script>
+</body>
+</html>
